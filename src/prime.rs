@@ -11,47 +11,47 @@ impl PrimeGenerator {
         }
     }
 
-    fn is_prime(n: u64) -> bool {
-        let mut divisors = 0;
-        for divisor in 1..=n {
-            if n % divisor == 0 {
-                divisors += 1;
+    fn is_prime(&self, n: u64) -> bool {
+        for prime in &self.primes {
+            if n % prime == 0 {
+                return false;
             }
         }
-        divisors == 2
+        true
     }
 
-    pub fn nth(&mut self, nth: u64) -> u64 {
-        while self.primes.len() < nth as usize {
-            if PrimeGenerator::is_prime(self.candidate) {
+    pub fn nth(&mut self, nth: usize) -> u64 {
+        while self.primes.len() < nth {
+            if self.is_prime(self.candidate) {
                 self.primes.push(self.candidate);
             }
             self.candidate += 1;
         }
-        self.primes[(nth - 1) as usize]
+        self.primes[nth - 1]
     }
 }
 
 #[cfg(test)]
 mod test {
     use crate::prime::PrimeGenerator;
-
-    #[test]
-    fn verifies_a_number_is_prime_or_not() {
-        assert_eq!(PrimeGenerator::is_prime(1), false);
-        assert_eq!(PrimeGenerator::is_prime(2), true);
-        assert_eq!(PrimeGenerator::is_prime(3), true);
-        assert_eq!(PrimeGenerator::is_prime(4), false);
-        assert_eq!(PrimeGenerator::is_prime(5), true);
-    }
+    use std::collections::HashMap;
 
     #[test]
     fn returns_the_nth_prime_number() {
         let mut prime_generator = PrimeGenerator::new();
 
-        assert_eq!(prime_generator.nth(6), 13);
-        assert_eq!(prime_generator.nth(10), 29);
-        assert_eq!(prime_generator.nth(100), 541);
-        assert_eq!(prime_generator.nth(1), 2);
+        let setup = HashMap::from([
+            (10, 29),
+            (100, 541),
+            (1000, 7919),
+            (10000, 104729),
+            (1, 2),
+            (2, 3),
+            (6, 13),
+        ]);
+
+        for (nth, prime) in setup {
+            assert_eq!(prime_generator.nth(nth), prime);
+        }
     }
 }
